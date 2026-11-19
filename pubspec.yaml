@@ -57,6 +57,7 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.4
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -68,6 +69,8 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+  assets:
+    - assets/icon/logo.png
 
   # To add assets to your application, add an assets section, like this:
   # assets:
@@ -100,3 +103,14 @@ flutter:
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
 
+# Icon app: logo xe đẩy của IKiot-FE (src/components/logo.tsx), trắng trên nền primary #171717 như trang
+# đăng nhập web. Ảnh nguồn trong assets/icon/ dựng từ chính SVG đó. Sinh lại: dart run flutter_launcher_icons
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: assets/icon/icon.png
+  # Adaptive icon (Android 8+): launcher tự cắt hình tròn / vuông bo góc từ hai lớp này.
+  adaptive_icon_background: "#171717"
+  adaptive_icon_foreground: assets/icon/icon-foreground.png
+  # iOS từ chối icon có kênh trong suốt khi đẩy lên App Store.
+  remove_alpha_ios: true
