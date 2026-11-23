@@ -85,4 +85,34 @@ void main() {
       expect(ShipmentDetail.fromJson(detail(status: 'DELIVERED', due: 0)).awaitingQrMoney, isFalse);
     });
   });
+
+  group('ShipmentDetail.settledDelivery (ẩn "Còn phải thu")', () {
+    Map<String, dynamic> row(String status, num due, {String? qr, List<dynamic>? photos}) => {
+      'id': 's1',
+      'status': status,
+      'carrierType': 'INTERNAL',
+      'order': {'id': 'o1', 'code': 'DH1', 'status': 'RECEIVED', 'customerName': 'A', 'amountDue': due},
+      'proofPhotoUrls': photos,
+      'payment': qr == null
+          ? null
+          : {'reference': 'R', 'amount': 100, 'status': qr, 'qrUrl': null, 'expiresAt': '2026-11-23T10:00:00.000Z', 'expired': false},
+    };
+
+    test('đã giao, không còn gì thu: ẩn thẻ tiền', () {
+      expect(ShipmentDetail.fromJson(row('DELIVERED', 0)).settledDelivery, isTrue);
+    });
+
+    test('đã giao nhưng QR chưa về đủ tiền: vẫn hiện thẻ tiền', () {
+      expect(ShipmentDetail.fromJson(row('DELIVERED', 100, qr: 'PENDING')).settledDelivery, isFalse);
+    });
+
+    test('chưa giao: vẫn hiện thẻ tiền', () {
+      expect(ShipmentDetail.fromJson(row('IN_TRANSIT', 100)).settledDelivery, isFalse);
+    });
+
+    test('đọc ảnh bằng chứng, bỏ giá trị lạ, thiếu thì rỗng', () {
+      expect(ShipmentDetail.fromJson(row('DELIVERED', 0, photos: ['https://a/1.jpg', 3])).proofPhotoUrls, ['https://a/1.jpg']);
+      expect(ShipmentDetail.fromJson(row('DELIVERED', 0)).proofPhotoUrls, isEmpty);
+    });
+  });
 }

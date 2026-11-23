@@ -14,6 +14,7 @@ import '../../core/realtime/live_refresh.dart';
 import 'deliver_sheet.dart';
 import 'deliveries_repository.dart';
 import 'fail_sheet.dart';
+import 'proof_photos.dart';
 import 'shipment_detail.dart';
 import 'shipment_summary.dart';
 import 'shipment_ui.dart';
@@ -296,6 +297,10 @@ class _DeliveryDetailScreenState extends State<DeliveryDetailScreen>
                   s.deliveryAddress ?? 'Chưa có địa chỉ',
                   style: theme.typography.body.sm,
                 ),
+                if (s.customerName != s.displayName) ...[
+                  const SizedBox(height: 4),
+                  Text('Khách của đơn: ${s.customerName}', style: muted),
+                ],
                 const SizedBox(height: 8),
                 Wrap(
                   spacing: 12,
@@ -340,25 +345,31 @@ class _DeliveryDetailScreenState extends State<DeliveryDetailScreen>
             ),
           ),
           const SizedBox(height: 12),
-          AppCard(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Còn phải thu', style: muted),
-                const SizedBox(height: 2),
-                Text(
-                  amountDueText(s.status, s.amountDue),
-                  style: theme.typography.body.xl2.copyWith(
-                    fontWeight: FontWeight.w700,
+          // Đã giao xong tiền: ẩn "Còn phải thu", hiện giờ giao và ảnh bằng chứng. Giao rồi mà tiền QR chưa về
+          // thì vẫn giữ thẻ tiền, vì shipper còn phải thu tiếp.
+          if (!shipment.settledDelivery)
+            AppCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Còn phải thu', style: muted),
+                  const SizedBox(height: 2),
+                  Text(
+                    amountDueText(s.status, s.amountDue),
+                    style: theme.typography.body.xl2.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
-                ),
-                if (s.customerName != s.displayName) ...[
-                  const SizedBox(height: 6),
-                  Text('Khách của đơn: ${s.customerName}', style: muted),
                 ],
-              ],
+              ),
             ),
-          ),
+          if (shipment.status == ShipmentStatus.delivered) ...[
+            if (!shipment.settledDelivery) const SizedBox(height: 12),
+            DeliveredCard(
+              deliveredAt: shipment.deliveredAt,
+              photoUrls: shipment.proofPhotoUrls,
+            ),
+          ],
           if (shipment.status == ShipmentStatus.inTransit &&
               shipment.carrierType == 'INTERNAL') ...[
             const SizedBox(height: 12),

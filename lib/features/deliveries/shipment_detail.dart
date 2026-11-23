@@ -8,6 +8,7 @@ class ShipmentDetail {
     required this.carrierType,
     this.note,
     this.deliveredAt,
+    this.proofPhotoUrls = const [],
     this.events = const [],
     this.payment,
   });
@@ -19,12 +20,19 @@ class ShipmentDetail {
   final String carrierType;
   final String? note;
   final DateTime? deliveredAt;
+
+  /// Ảnh shipper chụp lúc giao (URL Cloudinary). Rỗng với đơn giao qua đơn vị vận chuyển ngoài.
+  final List<String> proofPhotoUrls;
   final List<ShipmentEvent> events;
   final QrPayment? payment;
 
   String get id => summary.id;
   String get status => summary.status;
   num get amountDue => summary.amountDue;
+
+  /// Đã giao và không còn gì phải thu: phần tiền không còn là việc của shipper, chỉ còn là bằng chứng đã giao.
+  bool get settledDelivery =>
+      status == ShipmentStatus.delivered && !awaitingQrMoney;
 
   /// Đang trên đường: giao được, báo không thành được (trừ khi đã FAILED). Như `isOnTheRoad` của FE.
   bool get onTheRoad => const {
@@ -47,6 +55,7 @@ class ShipmentDetail {
     final events = json['events'];
     final payment = json['payment'];
     final deliveredAt = json['deliveredAt'] as String?;
+    final photos = json['proofPhotoUrls'];
     return ShipmentDetail(
       summary: ShipmentSummary.fromJson(json),
       orderStatus: (order['status'] as String?) ?? '',
@@ -55,6 +64,9 @@ class ShipmentDetail {
       deliveredAt: deliveredAt == null
           ? null
           : DateTime.parse(deliveredAt).toLocal(),
+      proofPhotoUrls: photos is List
+          ? photos.whereType<String>().toList()
+          : const [],
       events: events is List
           ? events
                 .cast<Map<String, dynamic>>()
