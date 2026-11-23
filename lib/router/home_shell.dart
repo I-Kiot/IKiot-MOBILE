@@ -31,7 +31,11 @@ class _HomeShellState extends State<HomeShell> {
   void initState() {
     super.initState();
     _lifecycle = AppLifecycleListener(
-      onResume: () => AppScope.of(context).counts.refresh(),
+      onResume: () {
+        final scope = AppScope.of(context);
+        scope.counts.refresh();
+        scope.realtime.resume();
+      },
     );
   }
 

@@ -39,6 +39,10 @@ class ApiClient {
   /// Gọi khi refresh thất bại: phiên đã chết, app phải về màn đăng nhập.
   void Function()? onSessionExpired;
 
+  /// Id socket realtime đang nối. Gửi kèm (`X-Socket-Id`) để BE không phát `entity:changed` ngược lại cho
+  /// chính máy vừa ghi: màn của máy này đã tự cập nhật từ response rồi.
+  String? Function()? socketIdProvider;
+
   Future<dynamic> get(String path, {Map<String, dynamic>? query}) =>
       _send(() => _dio.get<dynamic>(path, queryParameters: query));
 
@@ -79,6 +83,8 @@ class ApiClient {
   ) async {
     final token = await _tokens.readAccess();
     if (token != null) options.headers['Authorization'] = 'Bearer $token';
+    final socketId = socketIdProvider?.call();
+    if (socketId != null) options.headers['X-Socket-Id'] = socketId;
     handler.next(options);
   }
 

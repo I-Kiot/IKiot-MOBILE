@@ -3,6 +3,7 @@ class ShipmentSummary {
   const ShipmentSummary({
     required this.id,
     required this.status,
+    required this.orderId,
     required this.orderCode,
     required this.customerName,
     required this.amountDue,
@@ -16,6 +17,9 @@ class ShipmentSummary {
 
   final String id;
   final String status;
+
+  /// Id đơn của lần giao. Sự kiện realtime về đơn (kho xuất hàng, tiền QR về, đơn bị huỷ) chỉ mang id này.
+  final String orderId;
   final String orderCode;
   final String customerName;
 
@@ -42,6 +46,7 @@ class ShipmentSummary {
     return ShipmentSummary(
       id: json['id'] as String,
       status: json['status'] as String,
+      orderId: (order['id'] as String?) ?? '',
       orderCode: (order['code'] as String?) ?? '',
       customerName: (order['customerName'] as String?) ?? '',
       amountDue: (order['amountDue'] as num?) ?? 0,

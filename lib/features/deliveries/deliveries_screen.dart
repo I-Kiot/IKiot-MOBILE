@@ -8,6 +8,8 @@ import '../../core/network/api_exception.dart';
 import '../../core/widgets/count_badge.dart';
 import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/tab_page.dart';
+import '../../core/realtime/change_event.dart';
+import '../../core/realtime/live_refresh.dart';
 import '../../router/active_tab.dart';
 import '../../router/routes.dart';
 import 'deliveries_repository.dart';
@@ -25,7 +27,20 @@ class DeliveriesScreen extends StatefulWidget {
 }
 
 class _DeliveriesScreenState extends State<DeliveriesScreen>
-    with ActiveTabReload {
+    with ActiveTabReload, LiveRefresh {
+  /// Mọi thay đổi lần giao (có thể là đơn mới được gán cho mình), hoặc thay đổi một đơn đang nằm trong danh sách
+  /// (kho vừa xuất hàng, đơn bị huỷ). Không tải lại theo mọi đơn của shop: bán hàng tại quầy cũng phát sự kiện.
+  @override
+  bool isLiveRelevant(ChangeEvent event) =>
+      event.touchesResource(ChangeResource.shipments) ||
+      event.touchesAny(
+        ChangeResource.orders,
+        (_items ?? const []).map((s) => s.orderId),
+      );
+
+  @override
+  void onLiveRefresh() => _load();
+
   @override
   int get tabIndex => 0;
 

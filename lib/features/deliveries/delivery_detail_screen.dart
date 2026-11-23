@@ -9,6 +9,8 @@ import '../../core/widgets/confirm_dialog.dart';
 import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/toast.dart';
 import '../../router/routes.dart';
+import '../../core/realtime/change_event.dart';
+import '../../core/realtime/live_refresh.dart';
 import 'deliver_sheet.dart';
 import 'deliveries_repository.dart';
 import 'fail_sheet.dart';
@@ -38,7 +40,25 @@ class DeliveryDetailScreen extends StatefulWidget {
   State<DeliveryDetailScreen> createState() => _DeliveryDetailScreenState();
 }
 
-class _DeliveryDetailScreenState extends State<DeliveryDetailScreen> {
+class _DeliveryDetailScreenState extends State<DeliveryDetailScreen>
+    with LiveRefresh {
+  @override
+  bool isLiveRelevant(ChangeEvent event) =>
+      event.touchesId(ChangeResource.shipments, widget.id) ||
+      event.touchesId(ChangeResource.orders, _shipment?.summary.orderId);
+
+  /// Người khác vừa đổi đúng lần giao đang mở (kho xuất hàng, cửa hàng đổi shipper, tiền QR về): báo để shipper
+  /// biết vì sao màn vừa đổi. Thao tác của chính máy này không tới đây (BE loại socket gửi `X-Socket-Id`).
+  @override
+  void onLiveEvent(ChangeEvent event) {
+    if (!event.quiet && event.summary.isNotEmpty) {
+      showInfoToast(context, event.summary);
+    }
+  }
+
+  @override
+  void onLiveRefresh() => _load();
+
   late final DeliveriesRepository _repository = DeliveriesRepository(
     AppScope.of(context).api,
   );

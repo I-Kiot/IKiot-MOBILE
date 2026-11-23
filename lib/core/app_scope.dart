@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import '../features/auth/auth_controller.dart';
 import 'activity_counts.dart';
 import 'network/api_client.dart';
+import 'realtime/realtime_service.dart';
 import 'settings/app_settings.dart';
 
 /// Các đối tượng sống suốt vòng đời app, đưa xuống cây widget.
@@ -16,6 +17,7 @@ class AppScope extends InheritedWidget {
     required this.auth,
     required this.settings,
     required this.counts,
+    required this.realtime,
     required super.child,
   });
 
@@ -23,6 +25,7 @@ class AppScope extends InheritedWidget {
   final AuthController auth;
   final AppSettings settings;
   final ActivityCounts counts;
+  final RealtimeService realtime;
 
   static AppScope of(BuildContext context) {
     final scope = context.dependOnInheritedWidgetOfExactType<AppScope>();
@@ -35,5 +38,6 @@ class AppScope extends InheritedWidget {
       api != oldWidget.api ||
       auth != oldWidget.auth ||
       settings != oldWidget.settings ||
-      counts != oldWidget.counts;
+      counts != oldWidget.counts ||
+      realtime != oldWidget.realtime;
 }

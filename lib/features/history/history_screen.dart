@@ -10,6 +10,8 @@ import '../../core/format.dart';
 import '../../core/network/api_exception.dart';
 import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/tab_page.dart';
+import '../../core/realtime/change_event.dart';
+import '../../core/realtime/live_refresh.dart';
 import '../../router/active_tab.dart';
 import '../../router/routes.dart';
 import '../deliveries/shipment_summary.dart';
@@ -33,7 +35,18 @@ const _statusFilters = <(String?, String)>[
   (ShipmentStatus.failed, 'Không thành'),
 ];
 
-class _HistoryScreenState extends State<HistoryScreen> with ActiveTabReload {
+class _HistoryScreenState extends State<HistoryScreen>
+    with ActiveTabReload, LiveRefresh {
+  @override
+  bool isLiveRelevant(ChangeEvent event) =>
+      event.touchesResource(ChangeResource.shipments);
+
+  /// Chỉ tải khi đang mở tab này; tab khác thì [ActiveTabReload] tải lúc quay lại.
+  @override
+  void onLiveRefresh() {
+    if (ActiveTab.maybeOf(context)?.value == tabIndex) _reload();
+  }
+
   @override
   int get tabIndex => 1;
 

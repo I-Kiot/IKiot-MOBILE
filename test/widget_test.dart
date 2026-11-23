@@ -32,7 +32,7 @@ void main() {
       'id': 's1',
       'status': 'CREATED',
       'recipientName': 'Anh Khoa',
-      'order': {'code': 'DH000127', 'customerName': 'Nội Thất Phương Nam', 'amountDue': 8500000},
+      'order': {'id': 'o1', 'code': 'DH000127', 'customerName': 'Nội Thất Phương Nam', 'amountDue': 8500000},
     });
     final withoutRecipient = ShipmentSummary.fromJson({
       'id': 's2',

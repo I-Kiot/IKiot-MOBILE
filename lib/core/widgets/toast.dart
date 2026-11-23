@@ -13,3 +13,10 @@ void showErrorToast(BuildContext context, String message) => showFToast(
   title: Text(message),
   icon: const Icon(FLucideIcons.circleAlert),
 );
+
+/// Báo một thay đổi do người khác làm (realtime), không phải kết quả thao tác của mình.
+void showInfoToast(BuildContext context, String message) => showFToast(
+  context: context,
+  title: Text(message),
+  icon: const Icon(FLucideIcons.info),
+);

@@ -5,6 +5,7 @@ import 'package:material_ui/material_ui.dart';
 import 'core/activity_counts.dart';
 import 'core/app_scope.dart';
 import 'core/network/api_client.dart';
+import 'core/realtime/realtime_service.dart';
 import 'core/settings/app_settings.dart';
 import 'features/auth/auth_controller.dart';
 import 'router/app_router.dart';
@@ -16,12 +17,14 @@ class IkiotApp extends StatefulWidget {
     required this.auth,
     required this.settings,
     required this.counts,
+    required this.realtime,
   });
 
   final ApiClient api;
   final AuthController auth;
   final AppSettings settings;
   final ActivityCounts counts;
+  final RealtimeService realtime;
 
   @override
   State<IkiotApp> createState() => _IkiotAppState();
@@ -43,6 +46,7 @@ class _IkiotAppState extends State<IkiotApp> {
       auth: widget.auth,
       settings: widget.settings,
       counts: widget.counts,
+      realtime: widget.realtime,
       child: ListenableBuilder(
         listenable: widget.settings,
         builder: (context, _) {

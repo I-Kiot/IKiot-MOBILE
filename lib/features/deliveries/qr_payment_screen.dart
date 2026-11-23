@@ -10,6 +10,8 @@ import '../../core/network/api_exception.dart';
 import '../../core/widgets/confirm_dialog.dart';
 import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/toast.dart';
+import '../../core/realtime/change_event.dart';
+import '../../core/realtime/live_refresh.dart';
 import 'deliveries_repository.dart';
 import 'shipment_detail.dart';
 import '../../core/widgets/app_card.dart';
@@ -27,7 +29,19 @@ class QrPaymentScreen extends StatefulWidget {
   State<QrPaymentScreen> createState() => _QrPaymentScreenState();
 }
 
-class _QrPaymentScreenState extends State<QrPaymentScreen> {
+class _QrPaymentScreenState extends State<QrPaymentScreen> with LiveRefresh {
+  /// Tiền QR về phát `ORDER_QR_PAID` / `ORDER_QR_PARTIALLY_PAID` theo id đơn (webhook SePay).
+  @override
+  bool isLiveRelevant(ChangeEvent event) =>
+      event.touchesId(ChangeResource.shipments, widget.id) ||
+      event.touchesId(ChangeResource.orders, _shipment?.summary.orderId);
+
+  @override
+  Duration get liveDebounce => const Duration(milliseconds: 150);
+
+  @override
+  void onLiveRefresh() => _load(silent: true);
+
   late final DeliveriesRepository _repository = DeliveriesRepository(
     AppScope.of(context).api,
   );
@@ -46,7 +60,8 @@ class _QrPaymentScreenState extends State<QrPaymentScreen> {
   @override
   void initState() {
     super.initState();
-    _poll = Timer.periodic(const Duration(seconds: 5), (_) {
+    // Dự phòng khi socket rơi (mất sóng, app vừa mở lại): realtime là đường chính, nên hỏi thưa.
+    _poll = Timer.periodic(const Duration(seconds: 15), (_) {
       if (_waiting && !_busy) _load(silent: true);
     });
     // Đồng hồ đếm ngược chạy theo giây.
