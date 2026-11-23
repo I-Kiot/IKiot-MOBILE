@@ -16,6 +16,7 @@ import 'deliveries_repository.dart';
 import 'shipment_summary.dart';
 import 'shipment_ui.dart';
 import '../../core/widgets/app_card.dart';
+import '../../router/app_tabs.dart';
 
 /// Wireframe màn 2 (và màn 8 khi rỗng). Bản khung: tải, nhóm, kéo để làm mới.
 /// Chưa có: badge trên tab, tự làm mới qua socket / push, chuông thông báo.
@@ -78,7 +79,7 @@ class _DeliveriesScreenState extends State<DeliveriesScreen>
   Widget build(BuildContext context) {
     final counts = AppScope.of(context).counts;
     return TabPage(
-      title: 'Cần giao',
+      tab: AppTab.deliveries,
       actions: [
         ListenableBuilder(
           listenable: counts,

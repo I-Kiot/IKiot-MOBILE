@@ -10,6 +10,7 @@ import '../../core/widgets/option_sheet.dart';
 import '../../core/widgets/tab_page.dart';
 import '../../router/routes.dart';
 import 'avatar_editor.dart';
+import '../../router/app_tabs.dart';
 
 /// Wireframe màn 9.
 ///
@@ -46,7 +47,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         final settings = scope.settings;
         final subtitle = [?user?.roleName, ?user?.locationName].join(' · ');
         return TabPage(
-          title: 'Tôi',
+          tab: AppTab.profile,
           child: RefreshIndicator(
             onRefresh: scope.auth.refreshUser,
             child: ListView(

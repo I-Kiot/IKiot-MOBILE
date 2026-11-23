@@ -5,6 +5,7 @@ import 'package:material_ui/material_ui.dart';
 import '../core/app_scope.dart';
 import '../core/widgets/count_badge.dart';
 import 'active_tab.dart';
+import 'app_tabs.dart';
 
 /// Khoá navigator gốc, để màn chi tiết đẩy lên trên thanh tab.
 final rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -72,21 +73,16 @@ class _HomeShellState extends State<HomeShell> {
             _activeTab.value = index;
           },
           children: [
-            FBottomNavigationBarItem(
-              icon: CountBadge(
-                count: counts.deliveries,
-                child: const Icon(FLucideIcons.truck),
+            for (final tab in AppTab.values)
+              FBottomNavigationBarItem(
+                icon: tab == AppTab.deliveries
+                    ? CountBadge(
+                        count: counts.deliveries,
+                        child: Icon(tab.icon),
+                      )
+                    : Icon(tab.icon),
+                label: Text(tab.label),
               ),
-              label: const Text('Cần giao'),
-            ),
-            const FBottomNavigationBarItem(
-              icon: Icon(FLucideIcons.history),
-              label: Text('Lịch sử'),
-            ),
-            const FBottomNavigationBarItem(
-              icon: Icon(FLucideIcons.circleUserRound),
-              label: Text('Tôi'),
-            ),
           ],
         ),
       ),

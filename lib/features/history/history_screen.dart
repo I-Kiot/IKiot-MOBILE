@@ -19,6 +19,7 @@ import '../deliveries/shipment_ui.dart';
 import 'history_item.dart';
 import 'history_repository.dart';
 import '../../core/widgets/app_card.dart';
+import '../../router/app_tabs.dart';
 
 /// Wireframe màn 7. Mặc định "Hôm nay": cuối ngày shipper cần đối chiếu số tiền với cửa hàng.
 class HistoryScreen extends StatefulWidget {
@@ -165,7 +166,7 @@ class _HistoryScreenState extends State<HistoryScreen>
   @override
   Widget build(BuildContext context) {
     return TabPage(
-      title: 'Lịch sử',
+      tab: AppTab.history,
       actions: [
         FHeaderAction(
           icon: Icon(_searching ? FLucideIcons.x : FLucideIcons.search),
