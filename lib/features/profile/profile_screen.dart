@@ -1,5 +1,3 @@
-import 'dart:io' show Platform;
-
 import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
@@ -109,25 +107,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 FTileGroup(
                   label: const Text('Ứng dụng'),
                   children: [
-                    FTile(
-                      prefix: const Icon(FLucideIcons.map),
-                      title: const Text('Ứng dụng chỉ đường'),
-                      details: Text(mapsAppLabel(settings.mapsApp)),
-                      onPress: () async {
-                        final picked = await showOptionSheet(
-                          context,
-                          title: 'Ứng dụng chỉ đường',
-                          selected: settings.mapsApp,
-                          options: [
-                            (MapsApp.google, mapsAppLabel(MapsApp.google)),
-                            // Apple Maps chỉ có trên iPhone.
-                            if (Platform.isIOS)
-                              (MapsApp.apple, mapsAppLabel(MapsApp.apple)),
-                          ],
-                        );
-                        if (picked != null) settings.mapsApp = picked;
-                      },
-                    ),
                     FTile(
                       prefix: const Icon(FLucideIcons.sunMoon),
                       title: const Text('Giao diện'),

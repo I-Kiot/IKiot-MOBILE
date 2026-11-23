@@ -3,7 +3,6 @@ import 'package:material_ui/material_ui.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/format.dart';
-import '../../core/settings/app_settings.dart';
 import 'shipment_summary.dart';
 
 /// Nhãn trạng thái, cùng chữ với `SHIPMENT_STATUS_LABELS` của IKiot-FE.
@@ -46,12 +45,11 @@ String amountDueText(String status, num amountDue) {
 Future<void> callPhone(String phone) =>
     launchUrl(Uri(scheme: 'tel', path: phone.replaceAll(RegExp(r'\s'), '')));
 
-/// Mở chỉ đường tới địa chỉ bằng app chọn ở màn Tôi. Link https mở app bản đồ nếu có, không thì trình duyệt.
-Future<void> openDirections(String address, MapsApp app) =>
-    launchUrl(switch (app) {
-      MapsApp.google => Uri.https('www.google.com', '/maps/dir/', {
-        'api': '1',
-        'destination': address,
-      }),
-      MapsApp.apple => Uri.https('maps.apple.com', '/', {'daddr': address}),
-    }, mode: LaunchMode.externalApplication);
+/// Mở chỉ đường tới địa chỉ bằng Google Maps. Link https mở app Google Maps nếu máy có, không thì trình duyệt.
+Future<void> openDirections(String address) => launchUrl(
+  Uri.https('www.google.com', '/maps/dir/', {
+    'api': '1',
+    'destination': address,
+  }),
+  mode: LaunchMode.externalApplication,
+);

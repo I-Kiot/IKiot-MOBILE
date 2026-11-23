@@ -329,10 +329,7 @@ class _DeliveryDetailScreenState extends State<DeliveryDetailScreen>
                         variant: FButtonVariant.outline,
                         onPress: s.deliveryAddress == null
                             ? null
-                            : () => openDirections(
-                                s.deliveryAddress!,
-                                AppScope.of(context).settings.mapsApp,
-                              ),
+                            : () => openDirections(s.deliveryAddress!),
                         prefix: const Icon(FLucideIcons.navigation),
                         child: const Text('Chỉ đường'),
                       ),

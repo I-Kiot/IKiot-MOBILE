@@ -24,7 +24,7 @@ BE phải đang chạy (`pnpm run start:dev` trong IKiot-BE). Tài khoản đăn
   màn mã QR cho khách quét.
 - **Lịch sử**: lọc theo khoảng ngày và trạng thái, kèm số đã giao và tiền đã thu.
 - **Thông báo**: hộp thư của mình; thông báo giao hàng mở thẳng lần giao.
-- **Tôi**: hồ sơ, đổi ảnh đại diện, đổi mật khẩu, giao diện sáng/tối, app chỉ đường.
+- **Tôi**: hồ sơ, đổi ảnh đại diện, đổi mật khẩu, giao diện sáng/tối.
 
 ## Cấu trúc
 

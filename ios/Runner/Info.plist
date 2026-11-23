@@ -9,7 +9,6 @@
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>tel</string>
-		<string>comgooglemaps</string>
 	</array>
 	<key>NSAppTransportSecurity</key>
 	<dict>
