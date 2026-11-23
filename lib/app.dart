@@ -60,7 +60,7 @@ class _IkiotAppState extends State<IkiotApp> {
           final theme =
               (dark ? FTheme.neutral.dark : FTheme.neutral.light).touch;
           return MaterialApp.router(
-            title: 'iKiot Giao hàng',
+            title: 'IKiot Giao Hàng',
             debugShowCheckedModeBanner: false,
             routerConfig: _router,
             locale: const Locale('vi'),

@@ -1,4 +1,4 @@
-# iKiot Giao hàng
+# IKiot Giao Hàng
 
 Ứng dụng di động (Android + iOS) cho **nhân viên giao hàng** của cửa hàng dùng iKiot. Shipper xem đơn được
 giao, lấy hàng ở kho, đi giao, thu tiền (tiền mặt hoặc QR chuyển khoản), báo giao không thành và xem lại
