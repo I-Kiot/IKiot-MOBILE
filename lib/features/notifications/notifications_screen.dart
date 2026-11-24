@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -12,6 +14,10 @@ import 'app_notification.dart';
 import 'notifications_repository.dart';
 
 /// Hộp thông báo, mở từ chuông ở màn Cần giao. Bấm một thông báo giao hàng thì mở lần giao đó.
+///
+/// Realtime: BE phát `notification` vào phòng `user:<id>` mỗi khi có thông báo mới cho mình. Màn tải lại trang
+/// đầu và chèn thông báo mới lên trên, giữ nguyên những trang đã cuộn tới (không tải lại từ đầu, không nhảy cuộn).
+/// Socket nối lại sau khi đứt cũng làm vậy, vì thông báo đến lúc mất kết nối không được phát lại.
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
 
@@ -29,6 +35,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   bool _hasMore = true;
   bool _loading = false;
   ApiException? _error;
+  final List<StreamSubscription<void>> _live = [];
+  Timer? _liveTimer;
 
   @override
   void initState() {
@@ -42,10 +50,20 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (_page == 0 && !_loading && _error == null) _reload();
+    if (_live.isEmpty) {
+      final realtime = AppScope.of(context).realtime;
+      _live
+        ..add(realtime.notifications.listen((_) => _scheduleFetchNewest()))
+        ..add(realtime.reconnected.listen((_) => _scheduleFetchNewest()));
+    }
   }
 
   @override
   void dispose() {
+    _liveTimer?.cancel();
+    for (final sub in _live) {
+      sub.cancel();
+    }
     _scroll.dispose();
     super.dispose();
   }
@@ -64,7 +82,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       final page = await _repository.list(page: _page + 1);
       if (!mounted) return;
       setState(() {
-        _items.addAll(page.items);
+        // Thông báo mới chèn lên đầu làm trang phía server trượt xuống, nên trang sau có thể lặp dòng đã hiện.
+        final shown = {for (final n in _items) n.id};
+        _items.addAll(page.items.where((n) => !shown.contains(n.id)));
         _page = page.page;
         _hasMore = page.hasMore;
         _error = null;
@@ -75,6 +95,40 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       if (mounted) setState(() => _error = error);
     } finally {
       if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  /// Gộp các sự kiện dồn dập (nhiều thông báo cùng lúc) thành một lần gọi.
+  void _scheduleFetchNewest() {
+    _liveTimer?.cancel();
+    _liveTimer = Timer(const Duration(milliseconds: 400), _fetchNewest);
+  }
+
+  /// Tải trang đầu và hợp vào danh sách đang hiện: dòng mới lên đầu, dòng đã có thì cập nhật (vd. đã đọc ở máy khác).
+  Future<void> _fetchNewest() async {
+    if (!mounted) return;
+    // Chưa tải xong lần đầu, hoặc đang lỗi trắng màn: tải lại cả danh sách là đủ.
+    if (_page == 0) {
+      if (!_loading) _reload();
+      return;
+    }
+    try {
+      final page = await _repository.list(page: 1);
+      if (!mounted) return;
+      final fresh = {for (final n in page.items) n.id: n};
+      final shown = {for (final n in _items) n.id};
+      setState(() {
+        for (var i = 0; i < _items.length; i++) {
+          final updated = fresh[_items[i].id];
+          if (updated != null) _items[i] = updated;
+        }
+        _items.insertAll(0, page.items.where((n) => !shown.contains(n.id)));
+        _error = null;
+      });
+      AppScope.of(context).counts.unread =
+          (page.raw['unreadCount'] as num?)?.toInt() ?? 0;
+    } on ApiException {
+      // Lặng lẽ bỏ qua: danh sách cũ vẫn đúng, kéo xuống để tải lại khi có mạng.
     }
   }
 

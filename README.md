@@ -43,7 +43,7 @@ UI dùng [forui](https://forui.dev) 0.28, theme neutral (cùng tông shadcn củ
 - Sau khi shipper bấm "Đã lấy hàng", **kho phải xác nhận xuất kho** thì mới giao được (BE yêu cầu đơn ở
   trạng thái Đang vận chuyển). App hiện "Chờ kho xuất hàng" ở bước này.
 - **Realtime**: app nghe sự kiện `entity:changed` của BE qua Socket.IO. Danh sách Cần giao, chi tiết lần giao,
-  màn QR và Lịch sử tự tải lại khi cửa hàng gán đơn, kho xuất hàng hay tiền QR về. Màn QR vẫn hỏi lại BE mỗi
+  màn QR, Lịch sử và hộp Thông báo tự tải lại khi cửa hàng gán đơn, kho xuất hàng, tiền QR về hay có thông báo mới. Màn QR vẫn hỏi lại BE mỗi
   15 giây làm dự phòng khi mất kết nối.
 - Chưa có thông báo đẩy (cần cấu hình Firebase cho app).
 
