@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Kênh thông báo đẩy; MainActivity tạo kênh với id này, manifest đặt nó làm kênh mặc định của FCM. -->
+    <string name="delivery_channel_id" translatable="false">deliveries</string>
+    <string name="delivery_channel_name">Giao hàng</string>
+    <string name="delivery_channel_description">Đơn mới được giao, kho xuất hàng, thay đổi của lần giao</string>
+    <!-- primary của IKiot-FE -->
+    <color name="notification_accent">#171717</color>
+</resources>

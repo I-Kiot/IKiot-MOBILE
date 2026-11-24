@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
@@ -5,10 +7,12 @@ import 'package:material_ui/material_ui.dart';
 import 'core/activity_counts.dart';
 import 'core/app_scope.dart';
 import 'core/network/api_client.dart';
+import 'core/push/push_service.dart';
 import 'core/realtime/realtime_service.dart';
 import 'core/settings/app_settings.dart';
 import 'features/auth/auth_controller.dart';
 import 'router/app_router.dart';
+import 'router/routes.dart';
 
 class IkiotApp extends StatefulWidget {
   const IkiotApp({
@@ -18,6 +22,7 @@ class IkiotApp extends StatefulWidget {
     required this.settings,
     required this.counts,
     required this.realtime,
+    required this.push,
   });
 
   final ApiClient api;
@@ -25,6 +30,7 @@ class IkiotApp extends StatefulWidget {
   final AppSettings settings;
   final ActivityCounts counts;
   final RealtimeService realtime;
+  final PushService push;
 
   @override
   State<IkiotApp> createState() => _IkiotAppState();
@@ -32,9 +38,44 @@ class IkiotApp extends StatefulWidget {
 
 class _IkiotAppState extends State<IkiotApp> {
   late final GoRouter _router = buildRouter(widget.auth);
+  StreamSubscription<String>? _pushTaps;
+
+  /// Lần giao từ push đã bấm nhưng chưa mở được (chưa biết đăng nhập, hoặc đang ở màn đăng nhập).
+  String? _pendingShipment;
+
+  @override
+  void initState() {
+    super.initState();
+    _pendingShipment = widget.push.takeLaunchShipment();
+    _pushTaps = widget.push.openedShipments.listen((id) {
+      _pendingShipment = id;
+      _openPending();
+    });
+    widget.auth.addListener(_openPending);
+    _openPending();
+  }
+
+  /// Mở lần giao của push sau khi router đã đưa người dùng vào trong (redirect của splash/đăng nhập chạy trước).
+  void _openPending() {
+    final id = _pendingShipment;
+    if (id == null || widget.auth.status != AuthStatus.signedIn) return;
+    _pendingShipment = null;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final location = _router.routeInformationProvider.value.uri.path;
+      // Từ splash/đăng nhập thì `go` (thay cả ngăn xếp, quay lại là về Cần giao); đang dùng app thì `push`
+      // để quay lại đúng màn đang xem.
+      if (location == Routes.splash || location == Routes.login) {
+        _router.go(Routes.delivery(id));
+      } else {
+        _router.push(Routes.delivery(id));
+      }
+    });
+  }
 
   @override
   void dispose() {
+    widget.auth.removeListener(_openPending);
+    _pushTaps?.cancel();
     _router.dispose();
     super.dispose();
   }

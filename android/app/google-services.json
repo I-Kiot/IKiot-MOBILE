@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "742070044187",
+    "project_id": "ikiot-ms",
+    "storage_bucket": "ikiot-ms.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:742070044187:android:029f953f1334b6f0c05abe",
+        "android_client_info": {
+          "package_name": "vn.io.ikiot.ikiot_mobile"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "742070044187-12362ag6ulc7aimmhp1k2ocumlgec5od.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCIaq5NHVhFEgr_fTGUNt2-0kmqqYCriHg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "742070044187-12362ag6ulc7aimmhp1k2ocumlgec5od.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

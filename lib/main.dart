@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 import 'app.dart';
 import 'core/activity_counts.dart';
 import 'core/network/api_client.dart';
+import 'core/push/push_service.dart';
 import 'core/realtime/realtime_service.dart';
 import 'core/settings/app_settings.dart';
 import 'core/storage/token_storage.dart';
@@ -27,15 +28,23 @@ Future<void> main() async {
   api.socketIdProvider = () => realtime.socketId;
   counts.listenTo(realtime);
   api.onSessionExpired = auth.sessionExpired;
+  final push = PushService(api);
+  await push.init();
+  auth.beforeSignOut = push.unregister;
+  // Push đến lúc app đang mở: hệ thống không hiện, realtime đã lo màn hình; chỉ làm mới badge cho chắc.
+  push.receivedInForeground.listen((_) => counts.refresh());
   // Phiên kết thúc vì bất cứ lý do gì (đăng xuất, hết hạn, đổi mật khẩu): badge của người cũ không được ở lại.
   auth.addListener(() {
     switch (auth.status) {
       case AuthStatus.signedIn:
         realtime.start();
+        push.register();
       case AuthStatus.signedOut:
         // Socket ở trong phòng của shop theo token lúc nối: không ngắt thì người đăng nhập sau vẫn nhận sự kiện của người trước.
         realtime.stop();
         counts.reset();
+        // Đăng xuất chủ động đã gỡ ở beforeSignOut; còn phiên hết hạn thì tới đây mới biết: xoá token ở máy.
+        push.unregister();
       case AuthStatus.unknown:
         break;
     }
@@ -48,6 +57,7 @@ Future<void> main() async {
       settings: settings,
       counts: counts,
       realtime: realtime,
+      push: push,
     ),
   );
   // Không chờ ở đây: màn chờ hiện ngay, router đổi màn khi biết đã đăng nhập hay chưa.

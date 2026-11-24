@@ -45,7 +45,11 @@ UI dùng [forui](https://forui.dev) 0.28, theme neutral (cùng tông shadcn củ
 - **Realtime**: app nghe sự kiện `entity:changed` của BE qua Socket.IO. Danh sách Cần giao, chi tiết lần giao,
   màn QR, Lịch sử và hộp Thông báo tự tải lại khi cửa hàng gán đơn, kho xuất hàng, tiền QR về hay có thông báo mới. Màn QR vẫn hỏi lại BE mỗi
   15 giây làm dự phòng khi mất kết nối.
-- Chưa có thông báo đẩy (cần cấu hình Firebase cho app).
+- **Thông báo đẩy (FCM)**: đã chạy trên Android. App đăng ký thiết bị với BE (`POST /notifications/device-token`) khi
+  đăng nhập và gỡ khi đăng xuất; bấm một push giao hàng thì mở thẳng lần giao. `android/app/google-services.json` phải
+  thuộc **đúng project Firebase** mà BE dùng (`FIREBASE_PROJECT_ID` trong `.env` của IKiot-BE), nếu không BE không gửi
+  tới được. iOS chưa có: cần `ios/Runner/GoogleService-Info.plist` và APNs key (tài khoản Apple Developer); thiếu thì
+  app vẫn chạy, chỉ không có push.
 
 ## Đổi icon app
 
@@ -53,3 +57,6 @@ UI dùng [forui](https://forui.dev) 0.28, theme neutral (cùng tông shadcn củ
 cd ../IKiot-FE && node ../IKiot-MOBILE/tool/make-icons.js "$PWD/node_modules/.pnpm/sharp@0.34.5/node_modules/sharp" ../IKiot-MOBILE/assets/icon
 cd ../IKiot-MOBILE && dart run flutter_launcher_icons
 ```
+
+Thêm `../IKiot-MOBILE/android/app/src/main/res` làm tham số cuối của lệnh `node` để dựng lại cả icon nhỏ của thông báo
+đẩy (`drawable-*/ic_notification.png`).

@@ -12,6 +12,16 @@ class AuthController extends ChangeNotifier {
 
   final AuthRepository _repository;
 
+  /// Chạy trước khi xoá token phiên khi người dùng tự đăng xuất / đổi mật khẩu: việc cần gọi BE bằng phiên này
+  /// (gỡ thiết bị nhận push). Lỗi bị nuốt, không được chặn việc đăng xuất.
+  Future<void> Function()? beforeSignOut;
+
+  Future<void> _runBeforeSignOut() async {
+    try {
+      await beforeSignOut?.call();
+    } catch (_) {}
+  }
+
   AuthStatus _status = AuthStatus.unknown;
   SessionUser? _user;
 
@@ -68,12 +78,15 @@ class AuthController extends ChangeNotifier {
     required String next,
   }) async {
     await _repository.changePassword(current: current, next: next);
+    // BE chỉ thu hồi refresh token; access token đang giữ vẫn dùng được cho lời gọi gỡ thiết bị.
+    await _runBeforeSignOut();
     await _repository.logout();
     _user = null;
     _set(AuthStatus.signedOut);
   }
 
   Future<void> logout() async {
+    await _runBeforeSignOut();
     await _repository.logout();
     _user = null;
     _set(AuthStatus.signedOut);

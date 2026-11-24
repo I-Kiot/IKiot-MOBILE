@@ -24,11 +24,8 @@ class AppNotification {
 
   /// Lần giao mà thông báo nói tới, để mở màn chi tiết. Thông báo giao hàng (`SHIPMENT_*`) mang id shipment
   /// trong `referenceId`; thông báo khác (đơn, tiền) trỏ vào màn của web, app không có màn tương ứng.
-  String? get shipmentId {
-    if (type.startsWith('SHIPMENT_') && referenceId != null) return referenceId;
-    final match = RegExp(r'^/shipments/([0-9a-f-]{36})').firstMatch(link ?? '');
-    return match?.group(1);
-  }
+  String? get shipmentId =>
+      shipmentIdOf(type: type, referenceId: referenceId, link: link);
 
   AppNotification copyWith({bool? isRead}) => AppNotification(
     id: id,
@@ -52,4 +49,15 @@ class AppNotification {
         link: json['link'] as String?,
         referenceId: json['referenceId'] as String?,
       );
+}
+
+/// Một quy tắc cho cả hộp thông báo lẫn push (push mang `type` và `referenceId` trong `data`, không có `link`).
+String? shipmentIdOf({String? type, String? referenceId, String? link}) {
+  if ((type ?? '').startsWith('SHIPMENT_') &&
+      referenceId != null &&
+      referenceId.isNotEmpty) {
+    return referenceId;
+  }
+  final match = RegExp(r'^/shipments/([0-9a-f-]{36})').firstMatch(link ?? '');
+  return match?.group(1);
 }
