@@ -54,7 +54,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       final realtime = AppScope.of(context).realtime;
       _live
         ..add(realtime.notifications.listen((_) => _scheduleFetchNewest()))
-        ..add(realtime.reconnected.listen((_) => _scheduleFetchNewest()));
+        ..add(realtime.resync.listen((_) => _scheduleFetchNewest()));
     }
   }
 

@@ -7,6 +7,7 @@ import 'package:socket_io_client/socket_io_client.dart' as io;
 import '../config/env.dart';
 import '../storage/token_storage.dart';
 import 'change_event.dart';
+import 'fallback_poller.dart';
 
 /// Một kết nối Socket.IO tới IKiot-BE cho cả app, như `src/lib/socket.ts` của IKiot-FE.
 ///
@@ -14,8 +15,10 @@ import 'change_event.dart';
 /// - Token đọc lại **mỗi lần kết nối** (`setAuthFn`): access token xoay vòng sau mỗi lần refresh, token cũ sẽ bị từ chối.
 /// - Server từ chối token (hết hạn) thì ngắt với lý do `io server disconnect`, và socket.io **không** tự nối lại
 ///   trong trường hợp đó. Khi ấy gọi [onAuthRejected] để làm mới token qua HTTP rồi tự nối lại, có giới hạn số lần.
-/// - Sự kiện phát trong lúc mất kết nối (app chạy nền, mất sóng) bị mất hẳn, nên mỗi lần nối lại phát [reconnected]
+/// - Sự kiện phát trong lúc mất kết nối (app chạy nền, mất sóng) bị mất hẳn, nên mỗi lần nối lại phát [resync]
 ///   để các màn tải lại một lần.
+/// - Socket không nối được (proxy chặn websocket, server từ chối) thì [FallbackPoller] phát [resync] theo chu kỳ:
+///   các màn vẫn tự cập nhật, chỉ chậm hơn.
 class RealtimeService {
   RealtimeService({required this._tokens, this.onAuthRejected});
 
@@ -31,7 +34,13 @@ class RealtimeService {
 
   final _changes = StreamController<ChangeEvent>.broadcast();
   final _notifications = StreamController<void>.broadcast();
-  final _reconnected = StreamController<void>.broadcast();
+  final _resync = StreamController<void>.broadcast();
+  late final _fallback = FallbackPoller(
+    onTick: () {
+      debugPrint('Realtime chưa nối được: tải lại theo chu kỳ');
+      _resync.add(null);
+    },
+  );
 
   /// Chống trùng: FE cũng dùng `eventId` để không xử lý một sự kiện hai lần.
   final _seen = ListQueue<String>();
@@ -40,7 +49,9 @@ class RealtimeService {
 
   /// Có thông báo mới gửi riêng cho mình (sự kiện `notification` ở phòng `user:<id>`).
   Stream<void> get notifications => _notifications.stream;
-  Stream<void> get reconnected => _reconnected.stream;
+
+  /// "Có thể đã lỡ sự kiện, tải lại đi": phát khi socket nối lại sau khi rơi, và theo chu kỳ khi socket không nối được.
+  Stream<void> get resync => _resync.stream;
 
   /// Id socket đang nối, gửi kèm mỗi request (`X-Socket-Id`) để BE không phát lại thay đổi cho chính máy vừa làm.
   String? get socketId => (_socket?.connected ?? false) ? _socket!.id : null;
@@ -49,6 +60,7 @@ class RealtimeService {
     if (_socket != null) return;
     _everConnected = false;
     _authRetries = 0;
+    _fallback.start();
     final socket = io.io(
       Env.apiBaseUrl,
       io.OptionBuilder()
@@ -70,13 +82,16 @@ class RealtimeService {
     socket
       ..onConnect((_) {
         _authRetries = 0;
-        if (_everConnected) _reconnected.add(null);
+        _fallback.connected();
+        if (_everConnected) _resync.add(null);
         _everConnected = true;
       })
-      ..onConnectError(
-        (error) => debugPrint('Realtime không nối được: $error'),
-      )
+      ..onConnectError((error) {
+        _fallback.disconnected();
+        debugPrint('Realtime không nối được: $error');
+      })
       ..onDisconnect((reason) {
+        _fallback.disconnected();
         if (reason == 'io server disconnect') _recoverAuth();
       })
       ..on('entity:changed', _onChange)
@@ -85,13 +100,18 @@ class RealtimeService {
   }
 
   void stop() {
+    _fallback.stop();
     _socket?.dispose();
     _socket = null;
     _seen.clear();
   }
 
+  /// App xuống nền: ngừng tải lại theo chu kỳ.
+  void pause() => _fallback.foreground(false);
+
   /// App trở lại từ nền: nếu socket đã rơi mà không tự nối (bị server ngắt) thì nối lại.
   void resume() {
+    _fallback.foreground(true);
     final socket = _socket;
     if (socket != null && !socket.connected) socket.connect();
   }

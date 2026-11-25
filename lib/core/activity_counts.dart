@@ -25,7 +25,7 @@ class ActivityCounts extends ChangeNotifier {
         .where((e) => e.touchesResource(ChangeResource.shipments))
         .listen((_) => _scheduleRefresh());
     realtime.notifications.listen((_) => _scheduleRefresh());
-    realtime.reconnected.listen((_) => _scheduleRefresh());
+    realtime.resync.listen((_) => _scheduleRefresh());
   }
 
   void _scheduleRefresh() {

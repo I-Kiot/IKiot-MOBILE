@@ -37,6 +37,7 @@ class _HomeShellState extends State<HomeShell> {
         scope.counts.refresh();
         scope.realtime.resume();
       },
+      onPause: () => AppScope.of(context).realtime.pause(),
     );
   }
 

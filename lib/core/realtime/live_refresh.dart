@@ -9,7 +9,8 @@ import 'change_event.dart';
 ///
 /// - Sự kiện dồn dập (một thao tác chạm nhiều bảng, nhiều người cùng làm) gộp thành **một** lần tải
 ///   sau [liveDebounce].
-/// - Socket nối lại sau khi đứt thì tải lại một lần, vì sự kiện phát lúc mất kết nối đã mất hẳn.
+/// - Socket nối lại sau khi đứt thì tải lại một lần, vì sự kiện phát lúc mất kết nối đã mất hẳn; socket không nối
+///   được thì tải lại theo chu kỳ ([RealtimeService.resync]).
 /// - [onLiveEvent] nhận từng sự kiện liên quan trước khi tải, để màn chi tiết báo cho người dùng biết ai vừa đổi gì.
 mixin LiveRefresh<T extends StatefulWidget> on State<T> {
   /// Sự kiện này có đụng tới dữ liệu đang hiện không.
@@ -23,7 +24,7 @@ mixin LiveRefresh<T extends StatefulWidget> on State<T> {
   Duration get liveDebounce => const Duration(milliseconds: 600);
 
   StreamSubscription<ChangeEvent>? _changeSub;
-  StreamSubscription<void>? _reconnectSub;
+  StreamSubscription<void>? _resyncSub;
   Timer? _liveTimer;
 
   @override
@@ -36,7 +37,7 @@ mixin LiveRefresh<T extends StatefulWidget> on State<T> {
       onLiveEvent(event);
       _scheduleLiveRefresh();
     });
-    _reconnectSub = realtime.reconnected.listen((_) => _scheduleLiveRefresh());
+    _resyncSub = realtime.resync.listen((_) => _scheduleLiveRefresh());
   }
 
   void _scheduleLiveRefresh() {
@@ -50,7 +51,7 @@ mixin LiveRefresh<T extends StatefulWidget> on State<T> {
   void dispose() {
     _liveTimer?.cancel();
     _changeSub?.cancel();
-    _reconnectSub?.cancel();
+    _resyncSub?.cancel();
     super.dispose();
   }
 }
