@@ -52,9 +52,12 @@ class RealtimeService {
     final socket = io.io(
       Env.apiBaseUrl,
       io.OptionBuilder()
-          // Giống IKiot-FE: polling trước rồi nâng lên websocket. Proxy chặn header `Upgrade` (api-dev từng trả 400 cho
-          // websocket) thì vẫn nối được qua polling, thay vì mất realtime trong im lặng.
-          .setTransports(['polling', 'websocket'])
+          // Chỉ websocket, KHÔNG thêm 'polling' như IKiot-FE. Trên Android / iOS, socket_io_client chỉ có websocket
+          // (`io_transports.dart`: "Native only supports websocket"): khai 'polling' đứng đầu thì nó vẫn mở WebSocket
+          // nhưng gửi `?transport=polling`, server Engine.IO đóng ngay không handshake, và app nối lại mãi mà không bao
+          // giờ nhận được sự kiện nào (lỗi có thật 2026-11-25: mọi màn realtime chết, kho xuất hàng phải kéo tải lại).
+          // Proxy chặn websocket thì không có đường lùi về polling ở thư viện này; api-dev nhận websocket bình thường.
+          .setTransports(['websocket'])
           .enableReconnection()
           .enableForceNew()
           .setAuthFn((callback) {
