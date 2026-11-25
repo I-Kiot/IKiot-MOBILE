@@ -96,9 +96,15 @@ class ApiClient {
     ErrorInterceptorHandler handler,
   ) async {
     final options = error.requestOptions;
-    final isAuthCall =
-        options.path.startsWith('/auth/login') ||
-        options.path.startsWith('/auth/refresh');
+    // Các route xác thực công khai: 401 ở đây là sai thông tin, không phải phiên hết hạn.
+    final isAuthCall = const [
+      '/auth/login',
+      '/auth/refresh',
+      '/auth/resend-otp',
+      '/auth/send-forgot-password-otp',
+      '/auth/verify-forgot-password-otp',
+      '/auth/reset-password',
+    ].any(options.path.startsWith);
     if (error.response?.statusCode != 401 ||
         isAuthCall ||
         options.extra['retried'] == true) {

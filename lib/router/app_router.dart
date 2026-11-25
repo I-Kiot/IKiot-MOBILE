@@ -1,6 +1,7 @@
 import 'package:go_router/go_router.dart';
 
 import '../features/auth/auth_controller.dart';
+import '../features/auth/forgot_password_screen.dart';
 import '../features/auth/login_screen.dart';
 import '../features/auth/splash_screen.dart';
 import '../features/deliveries/deliveries_screen.dart';
@@ -24,9 +25,11 @@ GoRouter buildRouter(AuthController auth) {
       final location = state.matchedLocation;
       return switch (auth.status) {
         AuthStatus.unknown => location == Routes.splash ? null : Routes.splash,
-        AuthStatus.signedOut => location == Routes.login ? null : Routes.login,
+        // Màn đăng nhập và các màn con của nó (quên mật khẩu) mở được khi chưa đăng nhập.
+        AuthStatus.signedOut =>
+          location.startsWith(Routes.login) ? null : Routes.login,
         AuthStatus.signedIn =>
-          (location == Routes.login || location == Routes.splash)
+          (location.startsWith(Routes.login) || location == Routes.splash)
               ? Routes.deliveries
               : null,
       };
@@ -39,6 +42,13 @@ GoRouter buildRouter(AuthController auth) {
       GoRoute(
         path: Routes.login,
         builder: (context, state) => const LoginScreen(),
+        routes: [
+          GoRoute(
+            path: 'forgot',
+            builder: (context, state) =>
+                ForgotPasswordScreen(initialIdentifier: state.extra as String?),
+          ),
+        ],
       ),
       GoRoute(
         path: Routes.notifications,

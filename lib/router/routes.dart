@@ -2,6 +2,9 @@
 abstract final class Routes {
   static const splash = '/';
   static const login = '/login';
+
+  /// Quên mật khẩu, đẩy lên trên màn đăng nhập. `extra` là ô số điện thoại / email đang gõ dở.
+  static const forgotPassword = '/login/forgot';
   static const deliveries = '/deliveries';
   static const history = '/history';
   static const profile = '/me';

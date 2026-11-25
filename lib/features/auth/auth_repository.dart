@@ -1,5 +1,7 @@
 import '../../core/network/api_client.dart';
+import '../../core/network/api_exception.dart';
 import '../../core/storage/token_storage.dart';
+import 'otp_challenge.dart';
 import 'session_user.dart';
 
 class AuthRepository {
@@ -10,19 +12,75 @@ class AuthRepository {
 
   Future<bool> hasSession() async => await _tokens.readRefresh() != null;
 
-  Future<void> login({
-    required String phoneNumber,
+  /// Đăng nhập bằng số điện thoại **hoặc email** (`identifier`, như form của IKiot-FE).
+  ///
+  /// Trả `null` khi BE cấp phiên ngay (token đã lưu). Tài khoản chưa xác minh email thì BE gửi mã OTP và trả
+  /// [OtpChallenge]: chưa có phiên cho tới khi [verifyLoginOtp] thành công.
+  Future<OtpChallenge?> login({
+    required String identifier,
     required String password,
   }) async {
     final data = await _api.post(
       '/auth/login',
-      body: {'phoneNumber': phoneNumber, 'password': password},
+      body: {'identifier': identifier, 'password': password},
     ) as Map<String, dynamic>;
-    await _tokens.save(
-      accessToken: data['accessToken'] as String,
-      refreshToken: data['refreshToken'] as String,
-    );
+    final challenge = OtpChallenge.tryParse(data);
+    if (challenge != null) return challenge;
+    await _saveSession(data);
+    return null;
   }
+
+  /// Đổi thử thách + mã OTP lấy phiên. BE đánh dấu email đã xác minh, lần sau đăng nhập thẳng.
+  Future<void> verifyLoginOtp(String challengeToken, String otpCode) async {
+    final data = await _api.post(
+      '/auth/login/verify-otp',
+      body: {'challengeToken': challengeToken, 'otpCode': otpCode},
+    ) as Map<String, dynamic>;
+    await _saveSession(data);
+  }
+
+  /// Gửi lại mã cho thử thách đang có (cooldown 60 s, sớm hơn thì BE trả `OTP_RESEND_TOO_SOON`).
+  Future<OtpDelivery> resendOtp(String challengeToken) async =>
+      OtpDelivery.fromJson(
+        await _api.post(
+          '/auth/resend-otp',
+          body: {'challengeToken': challengeToken},
+        ) as Map<String, dynamic>,
+      );
+
+  /// Quên mật khẩu, bước 1: gửi mã OTP tới email của tài khoản.
+  Future<OtpChallenge> sendForgotPasswordOtp(String identifier) async {
+    final data = await _api.post(
+      '/auth/send-forgot-password-otp',
+      body: {'identifier': identifier},
+    ) as Map<String, dynamic>;
+    return OtpChallenge.tryParse(data) ??
+        (throw const ApiException(statusCode: 500, code: 'INTERNAL_ERROR'));
+  }
+
+  /// Quên mật khẩu, bước 2: đổi mã OTP lấy mã đặt lại mật khẩu (dùng một lần).
+  Future<String> verifyForgotPasswordOtp(
+    String challengeToken,
+    String otpCode,
+  ) async {
+    final data = await _api.post(
+      '/auth/verify-forgot-password-otp',
+      body: {'challengeToken': challengeToken, 'otpCode': otpCode},
+    ) as Map<String, dynamic>;
+    return data['resetToken'] as String;
+  }
+
+  /// Quên mật khẩu, bước 3. BE thu hồi mọi phiên của tài khoản; người dùng đăng nhập lại bằng mật khẩu mới.
+  Future<void> resetPassword(String resetToken, String newPassword) =>
+      _api.post(
+        '/auth/reset-password',
+        body: {'token': resetToken, 'newPassword': newPassword},
+      );
+
+  Future<void> _saveSession(Map<String, dynamic> data) => _tokens.save(
+    accessToken: data['accessToken'] as String,
+    refreshToken: data['refreshToken'] as String,
+  );
 
   /// Tải ảnh lên `/uploads` rồi trả URL.
   Future<String> uploadImage(String filePath) async {

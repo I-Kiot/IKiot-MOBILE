@@ -9,6 +9,10 @@ import 'package:flutter/foundation.dart';
 abstract final class Env {
   static const _override = String.fromEnvironment('API_BASE_URL');
 
+  /// Bước nhập mã OTP tự gửi `DEV_BYPASS` (BE chỉ nhận khi không chạy production), như `NEXT_PUBLIC_OTP_BYPASS` của
+  /// IKiot-FE: thử trên máy ảo không cần hộp thư thật. `--dart-define=OTP_BYPASS=true`.
+  static const otpBypass = bool.fromEnvironment('OTP_BYPASS');
+
   /// BE dev đã deploy. Đổi ở đây (hoặc truyền dart-define) khi có API production.
   static const hostedApi = 'https://api-dev.ikiot.io.vn';
 

@@ -30,6 +30,14 @@ class SessionUser {
   /// Dạng `"resource:action"`. Chỉ `/auth/me` trả về; phản hồi đăng nhập thì rỗng.
   final Set<String> permissions;
 
+  /// Được dùng app giao hàng không. **Cùng luật với `eligibleDriverWhere` của BE** (ai được gán làm shipper):
+  /// chủ shop, hoặc STAFF có `shipments:deliver` trong role. Quyền tạm của trưởng ca không có `shipments`, nên
+  /// không làm luật này đổi theo giờ ca. Người phụ trách đơn được gán giao đơn của chính mình nhưng không có quyền
+  /// này thì vẫn bị chặn: app chỉ dành cho shipper.
+  bool get canUseDeliveryApp =>
+      systemRole == 'TENANT_OWNER' ||
+      (systemRole == 'STAFF' && permissions.contains('shipments:deliver'));
+
   String get fullName {
     final name = '$lastName $firstName'.trim();
     return name.isEmpty ? phoneNumber : name;
