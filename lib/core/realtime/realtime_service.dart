@@ -52,7 +52,9 @@ class RealtimeService {
     final socket = io.io(
       Env.apiBaseUrl,
       io.OptionBuilder()
-          .setTransports(['websocket'])
+          // Giống IKiot-FE: polling trước rồi nâng lên websocket. Proxy chặn header `Upgrade` (api-dev từng trả 400 cho
+          // websocket) thì vẫn nối được qua polling, thay vì mất realtime trong im lặng.
+          .setTransports(['polling', 'websocket'])
           .enableReconnection()
           .enableForceNew()
           .setAuthFn((callback) {
@@ -68,6 +70,9 @@ class RealtimeService {
         if (_everConnected) _reconnected.add(null);
         _everConnected = true;
       })
+      ..onConnectError(
+        (error) => debugPrint('Realtime không nối được: $error'),
+      )
       ..onDisconnect((reason) {
         if (reason == 'io server disconnect') _recoverAuth();
       })
