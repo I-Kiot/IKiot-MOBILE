@@ -1,34 +1,93 @@
 {
   "project_info": {
-    "project_number": "742070044187",
-    "project_id": "ikiot-ms",
-    "storage_bucket": "ikiot-ms.firebasestorage.app"
+    "project_number": "579327926276",
+    "project_id": "ikiot-70cce",
+    "storage_bucket": "ikiot-70cce.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:742070044187:android:029f953f1334b6f0c05abe",
+        "mobilesdk_app_id": "1:579327926276:android:9f8aa59295d221cf1cd551",
         "android_client_info": {
-          "package_name": "vn.io.ikiot.ikiot_mobile"
+          "package_name": "com.ikiotms.ikiotms_mobile_app"
         }
       },
       "oauth_client": [
         {
-          "client_id": "742070044187-12362ag6ulc7aimmhp1k2ocumlgec5od.apps.googleusercontent.com",
+          "client_id": "579327926276-50q4jhaevfddvk3a36h2pm6np490usmm.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ikiotms.ikiotms_mobile_app",
+            "certificate_hash": "a0f0ba0749327a46962b1ce8ab3f2f8b4e73eb4f"
+          }
+        },
+        {
+          "client_id": "579327926276-smupq3eqf90r5hfqq7df45m679o74c72.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ikiotms.ikiotms_mobile_app",
+            "certificate_hash": "a457080353cf0154029fc43f703bdfe7c895369d"
+          }
+        },
+        {
+          "client_id": "579327926276-goetbt7pe3q59mphhne0lm510l1lb2m3.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyCIaq5NHVhFEgr_fTGUNt2-0kmqqYCriHg"
+          "current_key": "AIzaSyCIH9L2O29UKsbtvYR78tD7LtVHra_l4ww"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "742070044187-12362ag6ulc7aimmhp1k2ocumlgec5od.apps.googleusercontent.com",
+              "client_id": "579327926276-goetbt7pe3q59mphhne0lm510l1lb2m3.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "579327926276-0qqgebkssbb38v8q73v6kstqdogossl9.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.ikiotms.ikiotmsMobile"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:579327926276:android:aa8a712822df816f1cd551",
+        "android_client_info": {
+          "package_name": "vn.io.ikiot.ikiot_mobile"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "579327926276-goetbt7pe3q59mphhne0lm510l1lb2m3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCIH9L2O29UKsbtvYR78tD7LtVHra_l4ww"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "579327926276-goetbt7pe3q59mphhne0lm510l1lb2m3.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "579327926276-0qqgebkssbb38v8q73v6kstqdogossl9.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.ikiotms.ikiotmsMobile"
+              }
             }
           ]
         }
